@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>conor.tux — Mission Brief</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --bg-card: #111115;
+      --bg-card-hover: #16161c;
+      --border: #1e1e26;
+      --border-accent: #2a2a36;
+      --text: #e8e6e3;
+      --text-dim: #8a8a9a;
+      --text-muted: #5a5a6a;
+      --accent: #c9a84c;
+      --accent-dim: #a68a3a;
+      --accent-glow: rgba(201, 168, 76, 0.08);
+      --green: #4ade80;
+      --green-dim: rgba(74, 222, 128, 0.15);
+      --red: #f87171;
+      --blue: #60a5fa;
+      --purple: #a78bfa;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', -apple-system, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Scanline overlay ── */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* ── Header ── */
+    .header {
+      padding: 60px 24px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .terminal-tag {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--green);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      display: inline-block;
+      background: var(--green-dim);
+      padding: 4px 12px;
+      border-radius: 4px;
+    }
+
+    .header h1 {
+      font-family: var(--mono);
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+
+    .header h1 span {
+      color: var(--accent);
+    }
+
+    .header .subtitle {
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 24px;
+    }
+
+    .meta-bar {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .meta-bar .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-bar .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+    }
+
+    /* ── Container ── */
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── Section headers ── */
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin: 48px 0 24px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-label span {
+      color: var(--accent-dim);
+    }
+
+    /* ── Objective block ── */
+    .objective {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.8;
+    }
+
+    .objective .keyword {
+      color: var(--purple);
+    }
+
+    .objective .string {
+      color: var(--green);
+    }
+
+    .objective .comment {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* ── Timeline ── */
+    .timeline {
+      position: relative;
+      padding-left: 28px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--accent), var(--border) 30%, var(--border) 70%, var(--accent));
+    }
+
+    /* ── Stop card ── */
+    .stop {
+      position: relative;
+      margin-bottom: 20px;
+      transition: transform 0.2s ease;
+    }
+
+    .stop:hover {
+      transform: translateX(4px);
+    }
+
+    .stop::before {
+      content: '';
+      position: absolute;
+      left: -25px;
+      top: 24px;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--accent);
+      z-index: 1;
+      transition: background 0.2s ease;
+    }
+
+    .stop:hover::before {
+      background: var(--accent);
+    }
+
+    .stop.break-stop::before {
+      border-color: var(--text-muted);
+      width: 9px;
+      height: 9px;
+      left: -24px;
+      top: 25px;
+    }
+
+    .stop-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      transition: all 0.2s ease;
+    }
+
+    .stop:hover .stop-card {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+    }
+
+    .stop-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+
+    .stop-time {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .stop-name {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .stop-badges {
+      display: flex;
+      gap: 8px;
+      margin: 8px 0 12px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .badge-duration {
+      color: var(--text-dim);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+    }
+
+    .badge-type {
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(201, 168, 76, 0.2);
+    }
+
+    .stop-purpose {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--blue);
+      margin-bottom: 10px;
+    }
+
+    .stop-body {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    .stop-body p {
+      margin-bottom: 8px;
+    }
+
+    .checklist {
+      list-style: none;
+      margin: 10px 0 0;
+    }
+
+    .checklist li {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      padding: 4px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .checklist li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--accent-dim);
+    }
+
+    .stop-alert {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--red);
+      margin-top: 10px;
+      padding: 6px 10px;
+      background: rgba(248, 113, 113, 0.06);
+      border-radius: 4px;
+      border-left: 2px solid var(--red);
+    }
+
+    .stop-decision {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: rgba(201, 168, 76, 0.04);
+      border: 1px solid rgba(201, 168, 76, 0.15);
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    /* ── Rules section ── */
+    .rules-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .rule {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-dim);
+      transition: border-color 0.2s;
+    }
+
+    .rule:hover {
+      border-color: var(--border-accent);
+    }
+
+    .rule-icon {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      background: var(--accent-glow);
+      padding: 2px 8px;
+      border-radius: 3px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── Expected outcome ── */
+    .outcome {
+      background: var(--bg-card);
+      border: 1px solid var(--accent-dim);
+      border-radius: 10px;
+      padding: 24px;
+      margin-top: 32px;
+      text-align: center;
+    }
+
+    .outcome h3 {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .outcome-time {
+      font-family: var(--mono);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .outcome-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .outcome-list li {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .outcome-list li::before {
+      content: '✓';
+      color: var(--green);
+      font-weight: bold;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 40px 24px 60px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .footer .bow-tie {
+      font-size: 28px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stop { animation: fadeInUp 0.5s ease forwards; opacity: 0; }
+    .stop:nth-child(1) { animation-delay: 0.1s; }
+    .stop:nth-child(2) { animation-delay: 0.15s; }
+    .stop:nth-child(3) { animation-delay: 0.2s; }
+    .stop:nth-child(4) { animation-delay: 0.25s; }
+    .stop:nth-child(5) { animation-delay: 0.3s; }
+    .stop:nth-child(6) { animation-delay: 0.35s; }
+    .stop:nth-child(7) { animation-delay: 0.4s; }
+    .stop:nth-child(8) { animation-delay: 0.45s; }
+    .stop:nth-child(9) { animation-delay: 0.5s; }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .header { padding: 40px 16px 30px; }
+      .container { padding: 0 16px 60px; }
+      .stop-card { padding: 16px; }
+      .meta-bar { gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="terminal-tag">▶ mission.init()</div>
+    <h1>conor<span>.tux</span></h1>
+    <p class="subtitle">// wedding tuxedo acquisition protocol</p>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="dot"></span> Saturday 20 June 2026</div>
+      <div class="meta-item"><span class="dot"></span> Mayfair · Savile Row · Jermyn St</div>
+      <div class="meta-item"><span class="dot"></span> ~7 hours runtime</div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Objective -->
+    <div class="section-label"><span>01</span> — MISSION OBJECTIVE</div>
+    <div class="objective">
+      <span class="keyword">const</span> mission = {<br>
+      &nbsp;&nbsp;goal: <span class="string">"Decide on tux + complete shirt & accessories"</span>,<br>
+      &nbsp;&nbsp;constraint: <span class="string">"minimal friction"</span>,<br>
+      &nbsp;&nbsp;area: <span class="string">"Mayfair / Savile Row / Jermyn Street"</span>,<br>
+      &nbsp;&nbsp;status: <span class="string">"ready"</span><br>
+      }; <span class="comment">// no pressure, just precision</span>
+    </div>
+
+    <!-- Timeline -->
+    <div class="section-label"><span>02</span> — EXECUTION TIMELINE</div>
+    <div class="timeline">
+
+      <!-- Stop 1: Gieves & Hawkes -->
+      <div class="stop">
+        <div class="stop-card">
+          <div class="stop-header">
+            <span class="stop-time">11:30</span>
+            <span class="stop-name">Gieves & Hawkes</span>
+          </div>
+          <div class="stop-badges">
+            <span class="badge badge-duration">60–75 min</span>
+            <span class="badge badge-type">Benchmark Fitting</span>
+          </div>
+          <div class="stop-purpose">objective: Calibrate your eye</div>
+          <div class="stop-body">
+            <p>This is your reference point. No buying — just data collection.</p>
+            <ul class="checklist">
+              <li>Jacket drape and balance</li>
+              <li>Clean chest and shoulder fit</li>
+              <li>Lapel roll</li>
+            </ul>
+          </div>
+          <div class="stop-alert">⚠ No purchases. This is reconnaissance only.</div>
+        </div>
+      </div>
+
+      <!-- Stop 2: Chisou -->
+      <div class="stop break-stop">
+        <div class="stop-card">
+          <div class="stop-header">
+            <span class="stop-time">12:45</span>
+            <span class="stop-name">Chisou Mayfair</span>
+          </div>
+          <div class="stop-badges">
+            <span class="badge badge-duration">60 min</span>
+            <span class="badge badge-type">Lunch</span>
+          </div>
+          <div class="stop-purpose">objective: Refuel & align</div>
+          <div class="stop-body">
+            <p>Keep it light. Use this time to sync on key decisions:</p>
+            <ul class="checklist">
+              <li>Preferred silhouette</li>
+              <li>Black vs midnight blue</li>
+              <li>Budget comfort zone</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stop 3: Coffee -->
+      <div class="stop break-stop">
+        <div class="stop-card">
+          <div class="stop-header">
+            <span class="stop-time">13:45</span>
+            <span class="stop-name">Coffee / Buffer</span>
+          </div>
+          <div class="stop-badges">
+            <span class="badge badge-duration">20–25 min</span>
+            <span class="badge badge-type">Reset</span>
+          </div>
+          <div class="stop-body">
+            <p>Short reset before fittings. Stay sharp.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stop 4: Aristocracy London -->
+      <div class="stop">
+        <div class="stop-card">
+          <div class="stop-header">
+            <span class="stop-time">14:15</span>
+            <span class="stop-name">Aristocracy London</span>
+          </div>
+          <div class="stop-badges">
+            <span class="badge badge-duration">35–40 min</span>
+            <span class="badge badge-type">Ready-to-Wear</span>
+          </div>
+          <div class="stop-purpose">objective: Identify best RTW option</div>
+          <div class="stop-body">
+            <ul class="checklist">
+              <li>Try 2–3 jackets max</li>
+              <li>Reject anything with poor shoulders</li>
+              <li>Lock in a clear favourite</li>
+            </ul>
+          </div>
+          <div class="stop-alert">⚠ Hard stop at 14:50. Tell them upfront.</div>
+        </div>
+      </div>
+
+      <!-- Stop 5: Edit Suits Co. -->
+      <div class="stop">
+        <div class="stop-card">
+          <div class="stop-header">
+            <span class="stop-time">15:00</span>
+            <span class="stop-name">Edit Suits Co. Bond Street</span>
+          </div>
+          <div class="stop-badges">
+            <span class="badge badge-duration">60 min</span>
+            <span class="badge badge-type">Made-to-Measure</span>
+          </div>
+          <div class="stop-purpose">objective: MTM vs RTW decision</div>
+          <div class="stop-body">
+            <p>Evaluate whether made-to-measure fixes real fit issues, or if the improvement is marginal.</p>
+          </div>
+          <div class="stop-decision">
+            decision.make() → <strong>MTM</strong> || <strong>RTW</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stop 6: The Audley -->
+      <div class="stop break-stop">
+        <div class="stop-card">
+          <div class="stop-header">
+            <span class="stop-time">16:05</span>
+            <span class="stop-name">The Audley Public House</span>
+          </div>
+          <div class="stop-badges">
+            <span class="badge badge-duration">45–55 min</span>
+            <span class="badge badge-type">Strategic Reset</span>
+          </div>
+          <div class="stop-purpose">objective: Review, compare, decide</div>
+          <div class="stop-body">
+            <p>~10 min walk from Edit Suits. This is a strategic stop.</p>
+            <ul class="checklist">
+              <li>Review photos from all stops</li>
+              <li>Compare top options side by side</li>
+              <li>Decide what you're testing at Suitsupply</li>
+            </ul>
+          </div>
+          <div class="stop-alert">⚠ One pint. You want clarity, not drift.</div>
+        </div>
+      </div>
+
+      <!-- Stop 7: Walk -->
+      <div class="stop break-stop">
+        <div class="stop-card">
+          <div class="stop-header">
+            <span class="stop-time">17:05</span>
+            <span class="stop-name">Walk to Suitsupply</span>
+          </div>
+          <div class="stop-badges">
+            <span class="badge badge-duration">10–12 min</span>
+            <span class="badge badge-type">Transit</span>
+          </div>
+          <div class="stop-body">
+            <p>Arrive slightly early and settled.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stop 8: Suitsupply -->
+      <div class="stop">
+        <div class="stop-card">
+          <div class="stop-header">
+            <span class="stop-time">17:30</span>
+            <span class="stop-name">Suitsupply Vigo Street</span>
+          </div>
+          <div class="stop-badges">
+            <span class="badge badge-duration">60–75 min</span>
+            <span class="badge badge-type">Final Decision</span>
+          </div>
+          <div class="stop-purpose">objective: Buy or confirm MTM</div>
+          <div class="stop-body">
+            <ul class="checklist">
+              <li>Go straight to tuxedos</li>
+              <li>Try 2–3 options only</li>
+              <li>Compare against earlier benchmarks</li>
+            </ul>
+          </div>
+          <div class="stop-decision">
+            if (fit >= <strong>0.90</strong>) → purchase();<br>
+            else → revert(<strong>MTM</strong>);
+          </div>
+        </div>
+      </div>
+
+      <!-- Stop 9: Turnbull & Asser -->
+      <div class="stop">
+        <div class="stop-card">
+          <div class="stop-header">
+            <span class="stop-time">18:45</span>
+            <span class="stop-name">Turnbull & Asser</span>
+          </div>
+          <div class="stop-badges">
+            <span class="badge badge-duration">20–30 min</span>
+            <span class="badge badge-type">Shirt + Accessories</span>
+          </div>
+          <div class="stop-purpose">objective: Complete the build</div>
+          <div class="stop-body">
+            <p>~8–10 min walk from Suitsupply. Final stop.</p>
+            <ul class="checklist">
+              <li>White Marcella (piqué) shirt</li>
+              <li>Double cuffs</li>
+              <li>Bow tie (ideally self-tie)</li>
+              <li>Cufflinks / studs if needed</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Execution Rules -->
+    <div class="section-label"><span>03</span> — EXECUTION RULES</div>
+    <div class="rules-grid">
+      <div class="rule">
+        <span class="rule-icon">R1</span>
+        Shoulders are non-negotiable. If the shoulders don't fit, walk away.
+      </div>
+      <div class="rule">
+        <span class="rule-icon">R2</span>
+        Limit options aggressively. Decision fatigue is the enemy.
+      </div>
+      <div class="rule">
+        <span class="rule-icon">R3</span>
+        No purchases before Suitsupply. Gather data first, commit later.
+      </div>
+      <div class="rule">
+        <span class="rule-icon">R4</span>
+        Take photos at every stop. You'll need them at The Audley.
+      </div>
+      <div class="rule">
+        <span class="rule-icon">R5</span>
+        Stay disciplined on timing at Aristocracy. Hard stop = hard stop.
+      </div>
+    </div>
+
+    <!-- Expected Outcome -->
+    <div class="outcome">
+      <h3>// expected return</h3>
+      <div class="outcome-time">~19:15</div>
+      <ul class="outcome-list">
+        <li>Clear RTW vs MTM decision locked</li>
+        <li>Tuxedo acquired (likely Suitsupply)</li>
+        <li>Shirt and accessories completed</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <span class="bow-tie">🤵</span>
+    Built with precision for Conor Deegan<br>
+    <span style="color: var(--accent);">conor.tux</span> v1.0.0 — Wedding Protocol Engine
+  </footer>
+
+</body>
+</html>
